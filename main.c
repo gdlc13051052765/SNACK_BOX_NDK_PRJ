@@ -51,6 +51,7 @@ static void app_get_local_time(char* buffer)
             lt->tm_sec,sizeof(lt));
 }
 
+#define argument_count  6
 int main(int argc, char **argv)
 {
 	char *tesult;
@@ -58,21 +59,17 @@ int main(int argc, char **argv)
 	char name[256]={0};
 	char cmd[256]={0};
 
-	if(argc!=2)
+	if(argc!=argument_count)
 	{
-		printf("./app <videoX>\n");
+		printf("parameter error");
 		return 0;
 	}
-	printf("argv[0] = %s\n", argv[0]);
-	printf("argv[1] = %s\n", argv[1]);
-
-	// if(atoi(argv[1]) < 1)
-	// {
-	// 	printf("camera number error \n");
-	// 	return 0;
-	// }
 	//初始化摄像头
 	init_camera_dev(argv[1]);
+	init_camera_dev(argv[2]);
+	init_camera_dev(argv[3]);
+	init_camera_dev(argv[4]);
+	init_camera_dev(argv[5]);
 
 	// mjpeg_test();
 
@@ -83,7 +80,7 @@ int main(int argc, char **argv)
 		memset(now, 0, sizeof(now));
 		app_get_local_time(now);
 		memset(name,0,sizeof(name));
-		sprintf(name,"/data/meican/video%s/%s_%d.jpeg",argv[1],now,count);
+		sprintf(name,"/data/meican/video%s/%s_%d.jpeg",argv[count%5+1],now,count);
 		printf("jpg name = %s\n",name);
 		//通过摄像头获取图片
 		get_camera_jpg(name,count);

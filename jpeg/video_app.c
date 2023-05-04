@@ -134,7 +134,7 @@ int init_camera_dev(char *fdname)
 Description.:Get a jpeg image and save.
 */
 
-#define conter_pre    120
+#define conter_pre    97
 int get_camera_jpg(char *name,int cont)
 {
     //8、Get a image 
