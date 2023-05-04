@@ -51,7 +51,8 @@ static void app_get_local_time(char* buffer)
             lt->tm_sec,sizeof(lt));
 }
 
-#define argument_count  6
+#define argument_count  camera_count+1
+#define camera_count    5
 int main(int argc, char **argv)
 {
 	char *tesult;
@@ -80,7 +81,7 @@ int main(int argc, char **argv)
 		memset(now, 0, sizeof(now));
 		app_get_local_time(now);
 		memset(name,0,sizeof(name));
-		sprintf(name,"/data/meican/video%s/%s_%d.jpeg",argv[count%5+1],now,count);
+		sprintf(name,"/data/meican/video%s/%s_%d.jpeg",argv[count%camera_count+1],now,count);
 		printf("jpg name = %s\n",name);
 		//通过摄像头获取图片
 		get_camera_jpg(name,count);
