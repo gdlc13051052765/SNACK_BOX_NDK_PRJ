@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 		//通过摄像头获取图片
 		for(int i=1;i<=camera_count;i++)
 		{
-			if(open_stream_dev(camera_fd[i])==0)
+			if(open_stream_dev(i,camera_fd[i])==0)
 			{
 				count++;
 				memset(name,0,sizeof(name));
