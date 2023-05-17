@@ -20,7 +20,18 @@
 * 作    者： lc
 * 创建时间： 2023/03/30
 ==================================================================================*/
-int init_camera_dev(char *fdname);
+int init_camera_dev(int videoNum,char *fdname);
+
+ /*==================================================================================
+* 函 数 名： open_stream_dev
+* 参    数： 
+* 功能描述:  打开视频流
+* 返 回 值： 创建成功返回0
+* 备    注： 
+* 作    者： lc
+* 创建时间： 2023/03/30
+==================================================================================*/
+int open_stream_dev(int fd);
 
 /*==================================================================================
 * 函 数 名： get_jpg
@@ -31,6 +42,8 @@ int init_camera_dev(char *fdname);
 * 作    者： lc
 * 创建时间： 2023/03/30
 ==================================================================================*/
-int get_camera_jpg(char* name,int cont);
+int get_camera_jpg(int fd, int videoNum,char *name,int cont);
 
+int v4l2_close(int cam_fd);
+void app_get_local_time(char* buffer);
 int mjpeg_test(void);
