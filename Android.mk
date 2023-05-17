@@ -13,7 +13,7 @@ include $(PREBUILT_SHARED_LIBRARY)
 
 #编译可执行文件时调用上面编译的so的可执行文件
 include $(CLEAR_VARS) 
-LOCAL_MODULE := camera4Test_zero_delay
+LOCAL_MODULE := camera_3hub_test
 LOCAL_SRC_FILES := main.c\
 				   quic/decode.c\
 				   quic/identify.c\

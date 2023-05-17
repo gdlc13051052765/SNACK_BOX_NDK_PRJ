@@ -180,20 +180,20 @@ int init_camera_dev(int videoNum,char *fdname)
 
     } else {
         //7、Open stream input 启动数据流
-        int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        if(ioctl(cam_fd, VIDIOC_STREAMON, &type) < 0)
-        {
-            perror("Unable to start capture.");
-            return -1;
-        }
+        // int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        // if(ioctl(cam_fd, VIDIOC_STREAMON, &type) < 0)
+        // {
+        //     perror("Unable to start capture.");
+        //     return -1;
+        // }
     }
     //7、Open stream input 启动数据流
-    // int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    // if(ioctl(cam_fd, VIDIOC_STREAMON, &type) < 0)
-    // {
-    //     perror("Unable to start capture.");
-    //     return -1;
-    // }
+    int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if(ioctl(cam_fd, VIDIOC_STREAMON, &type) < 0)
+    {
+        perror("Unable to start capture.");
+        return -1;
+    }
     // if((close(cam_fd)) == -1)
     // {
     //     printf("close camera %s err\n",buf);
@@ -219,17 +219,17 @@ int open_stream_dev(int videoNum,int fd)
 	char buf[200]={0};
     int cam_fd =-1;
 
-    if(videoNum<3)
-    {
-         //7、Open stream input 启动数据流
-        int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        if(ioctl(fd, VIDIOC_STREAMON, &type) < 0)
-        {
-            perror("Unable to start capture.");
-            return -1;
-        }
-    } else {
-    }
+    // if(videoNum<3)
+    // {
+    //      //7、Open stream input 启动数据流
+    //     int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    //     if(ioctl(fd, VIDIOC_STREAMON, &type) < 0)
+    //     {
+    //         perror("Unable to start capture.");
+    //         return -1;
+    //     }
+    // } else {
+    // }
     return 0;
 }
 /*
@@ -276,20 +276,13 @@ int get_camera_jpg(int fd, int videoNum, char *name, int cont)
     if(videoNum<3)
     {
         // 1.关闭数据流
-        enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        if (ioctl(fd, VIDIOC_STREAMOFF, &type) < 0)
-        {
-            printf("ERR(%s):VIDIOC_STREAMOFF failed\n", __func__);
-            return -1;
-        } 
+        // enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        // if (ioctl(fd, VIDIOC_STREAMOFF, &type) < 0)
+        // {
+        //     printf("ERR(%s):VIDIOC_STREAMOFF failed\n", __func__);
+        //     return -1;
+        // } 
     }
-//    // 1.关闭数据流
-//     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-//     if (ioctl(fd, VIDIOC_STREAMOFF, &type) < 0)
-//     {
-//         printf("ERR(%s):VIDIOC_STREAMOFF failed\n", __func__);
-//         return -1;
-//     }
     //10、Queue the buffers.
     if(ioctl(fd, VIDIOC_QBUF, &buff) < 0)
     {
