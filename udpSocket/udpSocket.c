@@ -167,6 +167,8 @@ static void udpsocket_data_processing(char *json_string)
     cJSON *rootJson =NULL;
     cJSON *dataJson =NULL;
     cJSON *actionJson =NULL;
+    char testbuf[] = "afafsafasfasfasfasfasfasfasfasfasf";
+
 
     printf("json_string = %s\n",json_string);
     //JSON字符串到cJSON格式
@@ -174,6 +176,7 @@ static void udpsocket_data_processing(char *json_string)
     //判断cJSON_Parse函数返回值确定是否打包成功
     if(rootJson == NULL){
         printf("json pack into cjson error...");
+        goto err;
     }
     else{//打包成功调用cJSON_Print打印输出
         cJSON_Print(rootJson);
