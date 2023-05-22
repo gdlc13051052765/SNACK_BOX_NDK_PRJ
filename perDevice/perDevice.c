@@ -53,17 +53,31 @@ int peripheral_device_init(void)
 }
 
 /*==================================================================================
-* 函 数 名： open_box_door
+* 函 数 名： open_box_lock
 * 参    数： 
-* 功能描述:  打开设备门
+* 功能描述:  打开设备锁
 * 返 回 值：
 * 备    注： 创建成功返回0
 * 作    者： lc
 * 创建时间： 2023-05-08
 ==================================================================================*/
-int open_box_door(void)
+int open_box_lock(void)
 {
     return pca9535_set_gpio_value(DEV_DOOR_OPEN_BIT, 0);
+}
+
+/*==================================================================================
+* 函 数 名： close_box_lock
+* 参    数： 
+* 功能描述:  关闭设备锁
+* 返 回 值：
+* 备    注： 创建成功返回0
+* 作    者： lc
+* 创建时间： 2023-05-08
+==================================================================================*/
+int close_box_lock(void)
+{
+    return pca9535_set_gpio_value(DEV_DOOR_OPEN_BIT, 1);
 }
 
 /*==================================================================================
@@ -165,7 +179,7 @@ int get_door_perdevice_status(void)
 }
 
 /*==================================================================================
-* 函 数 名： get_door_lock_status
+* 函 数 名： get_lock_perdevice_status
 * 参    数： 
 * 功能描述:  获取门跟锁的状态
 * 返 回 值： 0代表门打开
@@ -180,7 +194,7 @@ RFID 信号（门侦信号） 锁舌状态（锁侦信号） 门状态
 有 无 未关好
 无 无 未关
 ==================================================================================*/
-int get_door_lock_status(void)
+int get_lock_perdevice_status(void)
 {
     int status = 0;
 
@@ -194,20 +208,44 @@ int get_door_lock_status(void)
     printf("door status: %d, lock status: %d\n", status, status&(0x0001<<(DEV_GATE_IN_BIT-1)));
 
     return status&(0x0001<<(DEV_GATE_IN_BIT-1));
-}
+} 
 
 /*==================================================================================
-* 函 数 名： close_box_door
+* 函 数 名： get_all_perdevice_status
 * 参    数： 
-* 功能描述:  关闭设备门
+* 功能描述:  获取所有外设的设备状态
 * 返 回 值：
-* 备    注： 创建成功返回0
+* 备    注： 个状态返回值
 * 作    者： lc
 * 创建时间： 2023-05-08
-==================================================================================*/
-int close_box_door(void)
+-----------------------------------------------------------------------------------*/
+struct devStatusRes get_all_perdevice_status(void)
 {
-    return pca9535_set_gpio_value(DEV_DOOR_OPEN_BIT, 1);
+    struct devStatusRes devStr;
+    int status = 0;
+
+    status = get_hub_perdevice_status();
+    for(int i = 0; i < MAX_HUB_NUM ;i++)
+    {
+        devStr.hub_status[i] = status &((0x01<<i));
+    }
+    status = get_led_perdevice_status();
+    for(int i = 0; i < MAX_LED_NUM ;i++)
+    {
+        devStr.led_status[i] = status &((0x01<<i));
+    }
+    status = get_door_perdevice_status();
+    for(int i = 0; i < MAX_BOX_DOOR_NUM ;i++)
+    {
+        devStr.door_status[i] = status &((0x01<<i));
+    }
+    status = get_lock_perdevice_status();
+    for(int i = 0; i < MAX_BOX_DOOR_NUM ;i++)
+    {
+        devStr.door_status[i] = status &((0x01<<i));
+    }
+
+    return devStr;
 }
 
 /*==================================================================================

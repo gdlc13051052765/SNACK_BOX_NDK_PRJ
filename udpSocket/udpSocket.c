@@ -17,8 +17,9 @@
 #include "../perDevice/perDevice.h"
 
 //udp命令列表 利用enum实现switch case 字符串功能
-enum choice {getDevStatus, setUsbHub, setled, setDoor, adapterLock, ota, endCmd};
-const char *choices[] = {"getDevStatus", "setUsbHub", "setled", "setDoor", "adapterLock", "ota", "endCmd"};
+enum choice {getDevStatus, setUvcCamera, setled, setLock, adapterLock, getDoorStatus, getLockStatus, ota, endCmd};
+const char *choices[] = {"getDevStatus", "setUvcCamera", "setled", "setLock", "adapterLock", "getDoorStatus", \
+                         "getLockStatus", "ota", "endCmd"};
 
 #define RCV_PORT 6666//接收端口
 #define SEN_PORT 8888//发送端口
@@ -123,12 +124,34 @@ int udpsocket_send_data(char *data)
 * 作    者： lc
 * 创建时间： 2023/03/30
 ==================================================================================*/
-static void udpsocket_ack_err_code(char *string)
+static void udpsocket_ack_err_code(int status, char *string)
 {
     //创建根节点JSON(最外面大括号的JSON对象)
     cJSON *json_root=cJSON_CreateObject();
-    cJSON_AddBoolToObject(json_root, "success", cJSON_True);
+    cJSON_AddBoolToObject(json_root, "success", status);
     cJSON_AddStringToObject(json_root, "message", string);
+    char *data = cJSON_Print(json_root);
+    cJSON_Delete(json_root); 
+    printf("udp send data = %s\n", data);
+    udpsocket_send_data(data);
+}
+
+/*==================================================================================
+* 函 数 名： udpsocket_ack_cmd_code
+* 参    数：
+* 功能描述:  udp socket 应答
+* 返 回 值： 创建成功返回0
+* 备    注： None
+* 作    者： lc
+* 创建时间： 2023/03/30
+==================================================================================*/
+static void udpsocket_ack_cmd_code(int status, char *string, char *dataStr)
+{
+    //创建根节点JSON(最外面大括号的JSON对象)
+    cJSON *json_root=cJSON_CreateObject();
+    cJSON_AddBoolToObject(json_root, "success", status);
+    cJSON_AddStringToObject(json_root, "message", string);
+    cJSON_AddStringToObject(json_root, "data", dataStr);
     char *data = cJSON_Print(json_root);
     cJSON_Delete(json_root); 
     printf("udp send data = %s\n", data);
@@ -161,12 +184,24 @@ static void data_json_processing(cJSON *dataJson)
 static void udpsocket_data_processing(char *json_string)
 {
     int i =0,num=0;
+    int status;
     char *buf =NULL;
     char data[128] = {};
+    char temp_str[256] = {};
     char numStr[256] = {};
+    struct devStatusRes dev_status = {0};
     cJSON *rootJson =NULL;
     cJSON *dataJson =NULL;
     cJSON *actionJson =NULL;
+
+    //设备状态json对象
+    cJSON *cjson_devStatus = NULL;
+    cJSON *cjson_data = NULL;
+    cJSON *cjson_uvc = NULL;
+    cJSON *cjson_led = NULL;
+    cJSON *cjson_door = NULL;
+    cJSON *cjson_lock = NULL;
+
     char testbuf[] = "afafsafasfasfasfasfasfasfasfasfasf";
 
 
@@ -207,16 +242,87 @@ static void udpsocket_data_processing(char *json_string)
     }
     switch(i)
     {
-        case getDevStatus://安卓获取当前设备各个硬件模块的当前状态
-           // udpsocket_send_data(udpSendBuf);
+        case getDevStatus://安卓获取当前设备各个硬件模块(HUB,LED,门,锁)的当前状态
+            /* 创建一个JSON数据对象(链表头结点) */
+            cjson_devStatus=cJSON_CreateObject();
+            cJSON_AddBoolToObject(cjson_devStatus, "success", cJSON_True);
+            cJSON_AddStringToObject(cjson_devStatus, "message", "success");
+            /* 添加一个嵌套的JSON数据（添加一个链表节点） */
+            cjson_data = cJSON_CreateObject();
+            cjson_uvc  = cJSON_CreateObject();
+            cjson_led  = cJSON_CreateObject();
+            cjson_door = cJSON_CreateObject();
+            cjson_lock = cJSON_CreateObject();
+                    
+            dev_status = get_all_perdevice_status();
+            for(int j=0;j<MAX_HUB_NUM;j++)
+            {
+                printf("udp get hub[%d] status = %d\n", j, dev_status.hub_status[j]);
+                memset(temp_str,0,sizeof(temp_str)); 
+                sprintf(temp_str, "%d",j);
+                if(dev_status.hub_status[j])
+                {
+                    cJSON_AddStringToObject(cjson_uvc, temp_str, "open");
+                } else {
+                    cJSON_AddStringToObject(cjson_uvc, temp_str, "close");
+                } 
+            }        
+            for(int j=0;j<MAX_LED_NUM;j++)
+            {
+                printf("udp get led[%d] status = %d\n", j, dev_status.led_status[j]);
+                memset(temp_str,0,sizeof(temp_str)); 
+                sprintf(temp_str, "%d",j);
+                if(dev_status.led_status[j])
+                {
+                    cJSON_AddStringToObject(cjson_led, temp_str, "open");
+                } else {
+                    cJSON_AddStringToObject(cjson_led, temp_str, "close");
+                } 
+            }       
+            for(int j=0;j<MAX_BOX_DOOR_NUM;j++)
+            {
+                printf("udp get door[%d] status = %d\n", j, dev_status.door_status[j]);
+                memset(temp_str,0,sizeof(temp_str)); 
+                sprintf(temp_str, "%d",j);
+                if(dev_status.door_status[j])
+                {
+                    cJSON_AddStringToObject(cjson_door, temp_str, "open");
+                } else {
+                    cJSON_AddStringToObject(cjson_door, temp_str, "close");
+                } 
+            }      
+            for(int j=0;j<MAX_BOX_DOOR_NUM;j++)
+            {
+                printf("udp get lock[%d] status = %d\n", j, dev_status.lock_status[j]);
+                memset(temp_str,0,sizeof(temp_str)); 
+                sprintf(temp_str, "%d",j);
+                if(dev_status.lock_status[j])
+                {
+                    cJSON_AddStringToObject(cjson_lock, temp_str, "open");
+                } else {
+                    cJSON_AddStringToObject(cjson_lock, temp_str, "close");
+                } 
+            }
+            cJSON_AddItemToObject(cjson_data, "uvc", cjson_uvc);
+            cJSON_AddItemToObject(cjson_data, "led", cjson_led);
+            cJSON_AddItemToObject(cjson_data, "door", cjson_door);
+            cJSON_AddItemToObject(cjson_data, "lock", cjson_lock);
+            cJSON_AddItemToObject(cjson_devStatus, "data", cjson_data);
+            //delete cjson
+            cJSON_Delete(rootJson);
+            char *data = cJSON_Print(cjson_devStatus);
+            printf("dev status return data = %s\n",data);
+            cJSON_Delete(cjson_devStatus); 
+            udpsocket_send_data(data);
+            return;
         break;
 
-        case setUsbHub: //打开某个USB-HUB
-            printf("open USB-HUB cmd\n");
+        case setUvcCamera: //打开某个USB-UVC 摄像头
+            printf("open UVC CAMREA cmd\n");
             actionJson = cJSON_GetObjectItem(dataJson, "usb");
             if(actionJson==NULL)
             {
-                printf("data usb hub cmd err\n");
+                printf("data uvc camera cmd err\n");
                 goto err;
             } 
             str = cJSON_PrintUnformatted(actionJson);
@@ -235,10 +341,10 @@ static void udpsocket_data_processing(char *json_string)
                    // printf("numJson = %s\n", numJson->valuestring);  
                     if(strcmp("open", numJson->valuestring) == 0)
                     {
-                        printf("USB-HUB-%d open\n",i);
+                        printf("UVC-CAMERA-%d open\n",i);
                         open_close_usb_device(i-1, true); 
                     } else {
-                        printf("USB-HUB-%d close\n",i);
+                        printf("UVC-CAMERA-%d close\n",i);
                         open_close_usb_device(i-1, false);
                     }
                 }
@@ -247,7 +353,7 @@ static void udpsocket_data_processing(char *json_string)
             cJSON_Delete(rootJson);
             memset(data,0,sizeof(data)); 
             sprintf(data, "%s","success");
-            udpsocket_ack_err_code(data);
+            udpsocket_ack_err_code(cJSON_True,data);
             return;
         break;
 
@@ -285,16 +391,16 @@ static void udpsocket_data_processing(char *json_string)
             cJSON_Delete(rootJson);
             memset(data,0,sizeof(data)); 
             sprintf(data, "%s","success");
-            udpsocket_ack_err_code(data);
+            udpsocket_ack_err_code(cJSON_True,data);
             return;
         break;
 
-        case setDoor://打开柜门
-            printf("open door cmd\n");
+        case setLock://打开锁
+            printf("open lock cmd\n");
             actionJson = cJSON_GetObjectItem(dataJson, "door");
             if(actionJson==NULL)
             {
-                printf("data door cmd err\n");
+                printf("data open locl cmd err\n");
                 goto err;
             } 
             str = cJSON_PrintUnformatted(actionJson);
@@ -311,11 +417,11 @@ static void udpsocket_data_processing(char *json_string)
                     cJSON  *numJson = cJSON_GetObjectItem(actionJson, numStr);
                     if(strcmp("open", numJson->valuestring) == 0)
                     {
-                        printf("DOOR-%d open\n",i);
-                        open_box_door(); 
+                        printf("LOCK-%d open\n",i);
+                        open_box_lock(); 
                     } else {
-                        printf("DOOR-%d close\n",i);
-                        close_box_door(); 
+                        printf("LOCK-%d close\n",i);
+                        close_box_lock(); 
                     }
                 }
             }  
@@ -323,7 +429,7 @@ static void udpsocket_data_processing(char *json_string)
             cJSON_Delete(rootJson);
             memset(data,0,sizeof(data)); 
             sprintf(data, "%s","success");
-            udpsocket_ack_err_code(data);
+            udpsocket_ack_err_code(cJSON_True,data);
             return;
         break;
 
@@ -361,7 +467,72 @@ static void udpsocket_data_processing(char *json_string)
             cJSON_Delete(rootJson);
             memset(data,0,sizeof(data)); 
             sprintf(data, "%s","success");
-            udpsocket_ack_err_code(data);
+            udpsocket_ack_err_code(cJSON_True,data);
+            return;
+        break;
+        
+        case getDoorStatus://获取门状态
+            status = get_door_perdevice_status();
+            /* 创建一个JSON数据对象(链表头结点) */
+            cjson_devStatus=cJSON_CreateObject();
+            cJSON_AddBoolToObject(cjson_devStatus, "success", cJSON_True);
+            cJSON_AddStringToObject(cjson_devStatus, "message", "success");
+            /* 添加一个嵌套的JSON数据（添加一个链表节点） */
+            cjson_data = cJSON_CreateObject();
+            cjson_door = cJSON_CreateObject();
+             for(int j=0;j<MAX_BOX_DOOR_NUM;j++)
+            {
+                printf("udp get door[%d] status = %d\n", j, status);
+                memset(temp_str,0,sizeof(temp_str)); 
+                sprintf(temp_str, "%d",j);
+                if(status)
+                {
+                    cJSON_AddStringToObject(cjson_door, temp_str, "open");
+                } else {
+                    cJSON_AddStringToObject(cjson_door, temp_str, "close");
+                } 
+            }
+         
+            cJSON_AddItemToObject(cjson_data, "door", cjson_door);
+            cJSON_AddItemToObject(cjson_devStatus, "data", cjson_data);
+            //delete cjson
+            cJSON_Delete(rootJson);
+            data = cJSON_Print(cjson_devStatus);
+            printf("get door status return data = %s\n",data);
+            cJSON_Delete(cjson_devStatus); 
+            udpsocket_send_data(data);
+            return;
+        break;
+
+        case getLockStatus://获取锁状态
+            status = get_lock_perdevice_status();
+            /* 创建一个JSON数据对象(链表头结点) */
+            cjson_devStatus=cJSON_CreateObject();
+            cJSON_AddBoolToObject(cjson_devStatus, "success", cJSON_True);
+            cJSON_AddStringToObject(cjson_devStatus, "message", "success");
+            /* 添加一个嵌套的JSON数据（添加一个链表节点） */
+            cjson_data = cJSON_CreateObject();
+            cjson_lock = cJSON_CreateObject();
+            for(int j=0;j<MAX_BOX_DOOR_NUM;j++)
+            {
+                printf("udp get lock[%d] status = %d\n", j, status);
+                memset(temp_str,0,sizeof(temp_str)); 
+                sprintf(temp_str, "%d",j);
+                if(status)
+                {
+                    cJSON_AddStringToObject(cjson_lock, temp_str, "open");
+                } else {
+                    cJSON_AddStringToObject(cjson_lock, temp_str, "close");
+                } 
+            } 
+            cJSON_AddItemToObject(cjson_data, "lock", cjson_lock);
+            cJSON_AddItemToObject(cjson_devStatus, "data", cjson_data);
+            //delete cjson
+            cJSON_Delete(rootJson);
+            char *doorData = cJSON_Print(cjson_devStatus);
+            printf("get lock status return data = %s\n",doorData);
+            cJSON_Delete(cjson_devStatus); 
+            udpsocket_send_data(doorData);
             return;
         break;
 
@@ -378,6 +549,6 @@ static void udpsocket_data_processing(char *json_string)
         //udp socket 应答
         memset(data,0,sizeof(data));
         sprintf(data, "%s","err json cmd");
-        udpsocket_ack_err_code(data);
+        udpsocket_ack_err_code(cJSON_False,data);
         return;
 }
