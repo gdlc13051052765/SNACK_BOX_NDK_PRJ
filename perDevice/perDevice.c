@@ -63,7 +63,9 @@ int peripheral_device_init(void)
 ==================================================================================*/
 int open_box_lock(void)
 {
-    return pca9535_set_gpio_value(DEV_LOCK_OPEN_BIT, 0);
+    pca9535_set_gpio_value(DEV_LOCK_OPEN_BIT, 0);
+    // sleep(1);
+    // pca9535_set_gpio_value(DEV_LOCK_OPEN_BIT, 1);
 }
 
 /*==================================================================================
@@ -77,7 +79,9 @@ int open_box_lock(void)
 ==================================================================================*/
 int close_box_lock(void)
 {
-    return pca9535_set_gpio_value(DEV_LOCK_OPEN_BIT, 1);
+    pca9535_set_gpio_value(DEV_LOCK_OPEN_BIT, 1);
+    // sleep(1);
+    // pca9535_set_gpio_value(DEV_LOCK_OPEN_BIT, 0);
 }
 
 /*==================================================================================

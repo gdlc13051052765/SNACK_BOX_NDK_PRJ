@@ -155,20 +155,6 @@ int pca9535_set_gpio_value(uint8_t num, uint8_t val)
     }
     printf("gpio set value = %04x\n", gpio_status);
 
-    buffer[0] = PCA9535_CONFIG_PORT0_REG; // PCA9535 register address for output port 0
-    buffer[1] = 0; // Output value
-    if (write(i2c_fd, buffer, 2) != 2) {
-        perror("Failed to write to PCA9535");
-        close(i2c_fd);
-        return -1;
-    }
-    buffer[0] = PCA9535_CONFIG_PORT1_REG; // PCA9535 register address for output port 0
-    buffer[1] = 0; // Output value
-    if (write(i2c_fd, buffer, 2) != 2) {
-        perror("Failed to write to PCA9535");
-        close(i2c_fd);
-        return -1;
-    }
     // printf("buffer[0] = %02x set value = %d\n", buffer[0],value);
     buffer[0] = PCA9535_OUTPUT_PORT0_REG; // PCA9535 register address for output port 0
     buffer[1] = gpio_status; // Output value

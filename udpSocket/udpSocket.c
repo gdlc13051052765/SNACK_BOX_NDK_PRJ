@@ -549,9 +549,9 @@ static void udpsocket_data_processing(char *json_string)
                 sprintf(temp_str, "%d",j);
                 if(status)
                 {
-                    cJSON_AddStringToObject(cjson_lock, temp_str, "close");
-                } else {
                     cJSON_AddStringToObject(cjson_lock, temp_str, "open");
+                } else {
+                    cJSON_AddStringToObject(cjson_lock, temp_str, "close");
                 } 
             } 
             cJSON_AddItemToObject(cjson_data, "lock", cjson_lock);

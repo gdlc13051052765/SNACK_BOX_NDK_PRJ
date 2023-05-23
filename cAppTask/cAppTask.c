@@ -173,10 +173,10 @@ void app_bufei_create_thread(void)
 	// else
 	// 	printf("thread 1 make ok\n");
 
-	if((temp = pthread_create(&thread[3], NULL, time_check_door_lock_status_thread, NULL)) != 0)//定时检测门锁信号线程任务
-		printf("thread 3 make fail\n");
-	else
-		printf("thread 3 make ok\n");
+	// if((temp = pthread_create(&thread[3], NULL, time_check_door_lock_status_thread, NULL)) != 0)//定时检测门锁信号线程任务
+	// 	printf("thread 3 make fail\n");
+	// else
+	// 	printf("thread 3 make ok\n");
 
 	pthread_join(thread[1],NULL);
 	pthread_join(thread[3],NULL);
