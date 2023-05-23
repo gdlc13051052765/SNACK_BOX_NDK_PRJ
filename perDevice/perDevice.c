@@ -63,7 +63,7 @@ int peripheral_device_init(void)
 ==================================================================================*/
 int open_box_lock(void)
 {
-    return pca9535_set_gpio_value(DEV_DOOR_OPEN_BIT, 0);
+    return pca9535_set_gpio_value(DEV_LOCK_OPEN_BIT, 0);
 }
 
 /*==================================================================================
@@ -77,7 +77,7 @@ int open_box_lock(void)
 ==================================================================================*/
 int close_box_lock(void)
 {
-    return pca9535_set_gpio_value(DEV_DOOR_OPEN_BIT, 1);
+    return pca9535_set_gpio_value(DEV_LOCK_OPEN_BIT, 1);
 }
 
 /*==================================================================================
@@ -147,7 +147,7 @@ int get_led_perdevice_status(void)
 }
 
 /*==================================================================================
-* 函 数 名： get_door_perdevice_status
+* 函 数 名： get_lock_perdevice_status
 * 参    数： 
 * 功能描述:  获取当前门外设开关状态
 * 返 回 值：
@@ -160,26 +160,37 @@ DOOR0|DOOR1|DOOR2|DOOR3|DOOR4|DOOR5|DOOR6|DOOR7|
      |     |     |     |     |     |     |     |   
 -----------------------------------------------------------------------------------
 ==================================================================================*/
-int get_door_perdevice_status(void)
+int get_lock_perdevice_status(void)
 {
     int b[16];
     int status = 0;
     uint8_t door_status = 0x00;
 
-    status = pca9535_get_gpio_status();
+    // status = pca9535_get_gpio_status();
 
-    for(int i=DEV_DOOR_OPEN_BIT; i<=DEV_FRID_CTL_BIT; i++)
+    // for(int i=DEV_LOCK_IN_BIT; i<=DEV_LOCK_IN_BIT; i++)
+    // {
+    //     b[i] = ((status & (unsigned char)pow(2, i)) >> i);
+    //     door_status = (door_status | b[i]<<(i-DEV_LOCK_IN_BIT));
+    //     printf("b[%d] = %d\n", i, b[i]);
+    // }
+    // printf("return lock_status = %02x\n", door_status);
+    // return door_status;
+
+    status = pca9535_get_gpio_status();
+    if(status & (0x0001<<(DEV_LOCK_IN_BIT)))
     {
-        b[i] = ((status & (unsigned char)pow(2, i)) >> i);
-        door_status = (door_status | b[i]<<(i-DEV_DOOR_OPEN_BIT));
-        printf("b[%d] = %d\n", i, b[i]);
+        printf("door close\n");
+    } else {
+        printf("door open\n");
     }
-    printf("return door_status = %02x\n", door_status);
-    return door_status;
+    printf("lock status: %d, lock status: %d\n", status, status&(0x0001<<(DEV_LOCK_IN_BIT)));
+
+    return status&(0x0001<<(DEV_LOCK_IN_BIT));
 }
 
 /*==================================================================================
-* 函 数 名： get_lock_perdevice_status
+* 函 数 名： get_door_perdevice_status
 * 参    数： 
 * 功能描述:  获取门跟锁的状态
 * 返 回 值： 0代表门打开
@@ -194,20 +205,20 @@ RFID 信号（门侦信号） 锁舌状态（锁侦信号） 门状态
 有 无 未关好
 无 无 未关
 ==================================================================================*/
-int get_lock_perdevice_status(void)
+int get_door_perdevice_status(void)
 {
     int status = 0;
 
     status = pca9535_get_gpio_status();
-    if(status & (0x0001<<(DEV_GATE_IN_BIT-1)))
+    if(status & (0x0001<<(DEV_GATE_IN_BIT)))
     {
         printf("door close\n");
     } else {
         printf("door open\n");
     }
-    printf("door status: %d, lock status: %d\n", status, status&(0x0001<<(DEV_GATE_IN_BIT-1)));
+    printf("door status: %d, door status: %d\n", status, status&(0x0001<<(DEV_GATE_IN_BIT)));
 
-    return status&(0x0001<<(DEV_GATE_IN_BIT-1));
+    return status&(0x0001<<(DEV_GATE_IN_BIT));
 } 
 
 /*==================================================================================

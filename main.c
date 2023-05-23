@@ -21,8 +21,29 @@
 
 int main(int argc, char **argv)
 {
+	printf("argv[0] = %s\n", argv[0]);
+	printf("argv[1] = %s\n", argv[1]);
+
+	
 	//初始化设备外设
 	peripheral_device_init();
+	if(argc>1)
+	{
+		if(strcmp("open",argv[1])==0)
+		{
+			printf("open door \n");
+			open_box_lock();
+		}
+		else if (strcmp("close",argv[1])==0)
+		{
+			printf("close door \n");
+			close_box_lock();
+		}
+		else {
+			printf("cmd error \n");
+		}
+		
+	}
 	//创建线程任务
 	app_bufei_create_thread();
 

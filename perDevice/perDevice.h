@@ -28,7 +28,7 @@ enum DEV_STATUS_NUM{
     DEV_HUB5_BIT,//HUB5对应的PCA9535的序号
     DEV_HUB6_BIT,//HUB6对应的PCA9535的序号
     DEV_HUB7_BIT,//HUB7对应的PCA9535的序号
-    DEV_DOOR_OPEN_BIT,//门开关控制对应的PCA9535的序号
+    DEV_LOCK_OPEN_BIT,//锁开关控制对应的PCA9535的序号
     DEV_GATE_IN_BIT,//rfid门信号检测PCA9535的序号
     DEV_LOCK_IN_BIT,//锁开关检测对应的PCA9535的序号
     DEV_FRID_CTL_BIT,//门锁适配控制对应的PCA9535的序号

@@ -8,6 +8,19 @@
 #define PCA9535_I2C_ADDR 0x25
 int i2c_fd = -1;
 
+// PCA9535命令宏
+#define  PCA9535_INPUT_PORT0_REG        0
+#define  PCA9535_INPUT_PORT1_REG        1
+#define  PCA9535_OUTPUT_PORT0_REG       2
+#define  PCA9535_OUTPUT_PORT1_REG       3
+#define  PCA9535_INVERSION_PORT0_REG    4
+#define  PCA9535_INVERSION_PORT1_REG    5
+#define  PCA9535_CONFIG_PORT0_REG       6
+#define  PCA9535_CONFIG_PORT1_REG       7
+#define  PCA9535_CONFIG_VAL0      0x00
+#define  PCA9535_CONFIG_VAL1      0x06
+
+
 /*==================================================================================
 * 函 数 名： pca9535_init
 * 参    数： 
@@ -19,7 +32,7 @@ int i2c_fd = -1;
 ==================================================================================*/
 int pca9535_init(void)
 {
-    uint8_t buffer[2];
+    uint8_t buffer[3];
 
     i2c_fd = open("/dev/i2c-3", O_RDWR);
     if (i2c_fd < 0) {
@@ -35,15 +48,15 @@ int pca9535_init(void)
     perror("open iic ok \n");
 
     //默认配置成输出输入兼容模式
-    buffer[0] = 0x06; // PCA9535 register address for output port 0
-    buffer[1] = 0x00; // Output value
+    buffer[0] = PCA9535_CONFIG_PORT0_REG; // PCA9535 register address for output port 0
+    buffer[1] = PCA9535_CONFIG_VAL0;
     if (write(i2c_fd, buffer, 2) != 2) {
         perror("Failed to write to PCA9535");
         close(i2c_fd);
         return -1;
     }
-    buffer[0] = 0x07; // PCA9535 register address for output port 0
-    buffer[1] = 0x00; // Output value
+    buffer[0] = PCA9535_CONFIG_PORT1_REG; // PCA9535 register address for output port 0
+    buffer[1] = PCA9535_CONFIG_VAL1; // Output value
     if (write(i2c_fd, buffer, 2) != 2) {
         perror("Failed to write to PCA9535");
         close(i2c_fd);
@@ -51,21 +64,20 @@ int pca9535_init(void)
     }
 
     // Set output values to 0xff
-    buffer[0] = 0x02; // PCA9535 register address for output port 0
+    buffer[0] = PCA9535_OUTPUT_PORT0_REG; // PCA9535 register address for output port 0
     buffer[1] = 0xff; // Output value
     if (write(i2c_fd, buffer, 2) != 2) {
         perror("Failed to write to PCA9535");
         close(i2c_fd);
         return -1;
     }
-    buffer[0] = 0x03; // PCA9535 register address for output port 0
-    buffer[1] = 0xff; // Output value
-    if (write(i2c_fd, buffer, 2) != 2) {
-        perror("Failed to write to PCA9535");
-        close(i2c_fd);
-        return -1;
-    }
-
+    // buffer[0] = PCA9535_OUTPUT_PORT1_REG; // PCA9535 register address for output port 0
+    // buffer[1] = 0xff; // Output value
+    // if (write(i2c_fd, buffer, 2) != 2) {
+    //     perror("Failed to write to PCA9535");
+    //     close(i2c_fd);
+    //     return -1;
+    // }
     return 0;
 }
 
@@ -84,7 +96,7 @@ int pca9535_get_gpio_status(void)
     uint8_t buffer[2];
 
     // Read input values
-    buffer[0] = 0x00; // PCA9535 register address for input port 0
+    buffer[0] = PCA9535_INPUT_PORT0_REG; // PCA9535 register address for input port 0
     if (write(i2c_fd, buffer, 1) != 1) {
         perror("Failed to write to PCA9535");
         close(i2c_fd);
@@ -99,7 +111,7 @@ int pca9535_get_gpio_status(void)
     printf("Input port0 values: 0x%02x\n", buffer[0]);
 
     // Read input values
-    buffer[0] = 0x01; // PCA9535 register address for input port 0
+    buffer[0] = PCA9535_INPUT_PORT1_REG; // PCA9535 register address for input port 0
     if (write(i2c_fd, buffer, 1) != 1) {
         perror("Failed to write to PCA9535");
         close(i2c_fd);
@@ -142,15 +154,30 @@ int pca9535_set_gpio_value(uint8_t num, uint8_t val)
         gpio_status &= (~(0x0001<<num));
     }
     printf("gpio set value = %04x\n", gpio_status);
+
+    buffer[0] = PCA9535_CONFIG_PORT0_REG; // PCA9535 register address for output port 0
+    buffer[1] = 0; // Output value
+    if (write(i2c_fd, buffer, 2) != 2) {
+        perror("Failed to write to PCA9535");
+        close(i2c_fd);
+        return -1;
+    }
+    buffer[0] = PCA9535_CONFIG_PORT1_REG; // PCA9535 register address for output port 0
+    buffer[1] = 0; // Output value
+    if (write(i2c_fd, buffer, 2) != 2) {
+        perror("Failed to write to PCA9535");
+        close(i2c_fd);
+        return -1;
+    }
     // printf("buffer[0] = %02x set value = %d\n", buffer[0],value);
-    buffer[0] = 0x02; // PCA9535 register address for output port 0
+    buffer[0] = PCA9535_OUTPUT_PORT0_REG; // PCA9535 register address for output port 0
     buffer[1] = gpio_status; // Output value
     if (write(i2c_fd, buffer, 2) != 2) {
         perror("Failed to write to PCA9535");
         close(i2c_fd);
         return -1;
     } 
-    buffer[0] = 0x03; // PCA9535 register address for output port 0
+    buffer[0] = PCA9535_OUTPUT_PORT1_REG; // PCA9535 register address for output port 0
     buffer[1] = gpio_status>>8; // Output value
     if (write(i2c_fd, buffer, 2) != 2) {
         perror("Failed to write to PCA9535");
