@@ -1,3 +1,6 @@
+#ifndef VIDEO_APP_H
+#define VIDEO_APP_H
+
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
@@ -34,3 +37,5 @@ int init_camera_dev(char *fdname);
 int get_camera_jpg(char* name);
 
 int mjpeg_test(void);
+
+#endif

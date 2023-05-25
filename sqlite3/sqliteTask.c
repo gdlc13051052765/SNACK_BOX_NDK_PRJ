@@ -2,6 +2,7 @@
 #include <fcntl.h>  
 #include <linux/ioctl.h>
 #include "sqlite3.h"
+#include "sqliteTask.h"
 #include "../debug.h"
 
 
@@ -28,6 +29,8 @@ static sqlite_int64  restaurantid = 155;//餐厅ID
 
 //基础配置数据库路径
 #define base_config_path "/data/meican/base_config.db"
+//uvc摄像头匹配关系数据路
+#define uvc_config_path "/data/meican/uvc_config.db"
 
 /*==================================================================================
 * 函 数 名： sqlite_create_config_db
@@ -76,5 +79,79 @@ int sqlite_create_config_db(void)
     debug("config insertdata = %s\n", tempdata);
     err = sqlite3_exec(config_db,tempdata,NULL,NULL,&zErrMsg);
     sqlite3_close(config_db);
+    return err;
+}
+
+/*==================================================================================
+* 函 数 名： sqlite_create_uvc_snck_mate_db
+* 参    数： 
+* 功能描述:  创建UVC摄像头层叠匹配数据库
+* 返 回 值： None
+* 备    注： 创建成功返回0
+* 作    者： lc
+* 创建时间： 2021-05-25
+==================================================================================*/
+int sqlite_create_uvc_snck_mate_db(void)
+{
+    int err;
+    char tempdata[500];
+    sqlite3 *config_db =NULL;
+
+    /* 创建基础信息数据库 */
+    err = sqlite3_open(uvc_config_path, &config_db);
+    if( err ) {
+        debug("Can't open database: %s\n", sqlite3_errmsg(config_db));
+        sqlite3_close(config_db);
+        return err;
+    } 
+    debug("You have opened a sqlite3 database named uvc_config successfully!\n");
+    //hub扩展板对应的hub号 box_num 零食柜格子号 pid_name uvc相机pid号 
+    char *sql = "create table config (hub_num INTEGER, box_num INTEGER,pid_name char);";
+
+    sqlite3_exec(config_db,sql,NULL,NULL, &zErrMsg);
+    sqlite3_close(config_db);
+    //return err;   
+    //插入数据
+    err = sqlite3_open(base_config_path, &config_db);
+    if( err ) {
+        debug("Can't open database: %s\n", sqlite3_errmsg(config_db));
+        sqlite3_close(config_db);
+        return err;
+    }
+    // sprintf(tempdata,"insert into config values(%d,%d,'%s');",
+    //         har_ver,soft_ver,shadow_name,shadow_id,main_m_name,menu_type,menu_ver,new_menu_ver,address,
+    //         dev_status,menu_level,Indent_code,uuid,sn,v2id,restaurantid,soft_verbak,JodID,OtaResult);
+
+    // debug("config insertdata = %s\n", tempdata);
+    // err = sqlite3_exec(config_db,tempdata,NULL,NULL,&zErrMsg);
+    sqlite3_close(config_db);
+    return err;
+}
+
+/*==================================================================================
+* 函 数 名： sqlite_insert_uvc_snck_mate_db
+* 参    数： 
+* 功能描述:  插入UVC摄像头层叠匹配数据库
+* 返 回 值： None
+* 备    注： 创建成功返回0
+* 作    者： lc
+* 创建时间： 2021-05-25
+==================================================================================*/
+int sqlite_insert_uvc_snck_mate_db(struct uvcStackMateStr pStr)
+{
+    int err;
+    char tempdata[300];
+    sqlite3 *config_db =NULL;
+
+    err = sqlite3_open_v2(uvc_config_path, &config_db, SQLITE_OPEN_READWRITE, NULL);
+    if(err) {
+    printf("Can't open database: %s\n", sqlite3_errmsg(config_db));
+    sqlite3_close_v2(config_db);
+    return err;
+    }
+    sprintf(tempdata,"insert into config values(%d,%d,'%s');",pStr.hub_num, pStr.box_num, pStr.pid);
+    printf("tempdata = %s \n", tempdata);
+    err = sqlite3_exec(config_db, tempdata, NULL, NULL, &zErrMsg);
+    sqlite3_close_v2(config_db);
     return err;
 }

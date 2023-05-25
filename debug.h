@@ -1,3 +1,6 @@
+#ifndef DEBUG_H
+#define DEBUG_H
+
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -19,3 +22,5 @@ typedef enum {
 		FAIL,	
 	
 }error_code;
+
+#endif

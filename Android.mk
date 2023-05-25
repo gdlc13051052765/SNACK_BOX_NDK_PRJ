@@ -31,6 +31,9 @@ LOCAL_SRC_FILES := main.c\
 				   json/cJSON.c\
 				   udpSocket/udpSocket.c\
 				   cAppTask/cAppTask.c\
+				   wrRefile/readTxt.c\
+				   uvcStackMate/uvcStackMate.c\
+				   cutString/cutString.c\
 				   
 LOCAL_SHARED_LIBRARIES :=   jpeg-prebult\
 							sqlite-prebult\

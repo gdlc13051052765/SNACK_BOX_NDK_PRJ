@@ -17,33 +17,18 @@
 #include "perDevice/perDevice.h"
 #include "log/cLog.h"
 #include "cAppTask/cAppTask.h"
-
+#include "wrRefile/readTxt.h"
+#include "uvcStackMate/uvcStackMate.h"
 
 int main(int argc, char **argv)
 {
-	printf("argv[0] = %s\n", argv[0]);
-	printf("argv[1] = %s\n", argv[1]);
+	//创建uvc匹配关系数据库
+	//sqlite_create_uvc_snck_mate_db();
 
-	
 	//初始化设备外设
 	peripheral_device_init();
-	if(argc>1)
-	{
-		if(strcmp("open",argv[1])==0)
-		{
-			printf("open door \n");
-			open_box_lock();
-		}
-		else if (strcmp("close",argv[1])==0)
-		{
-			printf("close door \n");
-			close_box_lock();
-		}
-		else {
-			printf("cmd error \n");
-		}
-		
-	}
+
+	uvc_camera_snck_mate();
 	//创建线程任务
 	app_bufei_create_thread();
 

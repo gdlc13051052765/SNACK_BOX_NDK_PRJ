@@ -1,3 +1,7 @@
+#ifndef PCA9535_H
+#define PCA9535_H
+
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
@@ -37,4 +41,6 @@ int pca9535_get_gpio_status(void);
 int pca9535_set_gpio_value(uint8_t num, uint8_t val);
 
 int pca9535_test(void);
+
+#endif
 

@@ -3,6 +3,7 @@
         "quirc.h": "c",
         "dbgutil.h": "c",
         "jpeglib.h": "c",
-        "capptask.h": "c"
+        "capptask.h": "c",
+        "uvcstackmate.h": "c"
     }
 }

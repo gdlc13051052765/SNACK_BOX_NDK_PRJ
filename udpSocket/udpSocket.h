@@ -1,3 +1,6 @@
+#ifndef UDPSOCKET_H
+#define UDPSOCKET_H
+
 #include <stdio.h>  
 #include <fcntl.h>  
 #include <string.h>
@@ -45,3 +48,5 @@ int udpsocket_send_data(char *data);
 * 创建时间： 2023/03/30
 ==================================================================================*/
 void udpsocket_set_weigh_uuid_data(char *data);
+
+#endif

@@ -128,7 +128,7 @@ static void udpsocket_ack_err_code(int status, char *string)
 {
     //创建根节点JSON(最外面大括号的JSON对象)
     cJSON *json_root=cJSON_CreateObject();
-    cJSON_AddBoolToObject(json_root, "success", status);
+    cJSON_AddBoolToObject(json_root, "success", status); 
     cJSON_AddStringToObject(json_root, "message", string);
     char *data = cJSON_Print(json_root);
     cJSON_Delete(json_root); 
@@ -355,10 +355,10 @@ static void udpsocket_data_processing(char *json_string)
                     if(strcmp("open", numJson->valuestring) == 0)
                     {
                         printf("UVC-CAMERA-%d open\n",i);
-                        open_close_usb_device(i-1, true); 
+                        open_close_usb_device(i, true); 
                     } else {
                         printf("UVC-CAMERA-%d close\n",i);
-                        open_close_usb_device(i-1, false);
+                        open_close_usb_device(i, false);
                     }
                 }
             } 
@@ -401,10 +401,10 @@ static void udpsocket_data_processing(char *json_string)
                     if(strcmp("open", numJson->valuestring) == 0)
                     {
                         printf("LED-%d open\n",i);
-                        open_close_led_device(i-1,true); 
+                        open_close_led_device(i,true); 
                     } else {
                         printf("LED-%d close\n",i);
-                        open_close_led_device(i-1,false); 
+                        open_close_led_device(i,false); 
                     }
                 }
             }  

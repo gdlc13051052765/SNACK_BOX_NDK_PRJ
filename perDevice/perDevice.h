@@ -1,3 +1,6 @@
+#ifndef PERDEVICE_H
+#define PERDEVICE_H
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
@@ -162,3 +165,5 @@ int get_lock_perdevice_status(void);
 * 创建时间： 2023-05-08
 -----------------------------------------------------------------------------------*/
 struct devStatusRes get_all_perdevice_status(void);
+
+#endif 		//_SWITCH_CONFIG_H__
